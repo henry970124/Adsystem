@@ -1,0 +1,327 @@
+services:
+  # 主控制系統 (Dashboard)
+  ad-main:
+    build: ./backend
+    container_name: ad-main
+    ports:
+      - "8001:5000"
+    environment:
+      - CONFIG_FILE=/app/config-docker.yml
+    volumes:
+      - ./config-docker.yml:/app/config-docker.yml
+      - ./dashboard.html:/app/dashboard.html
+      - ad-data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.10
+
+  # 隊伍 1
+  team1:
+    build:
+      context: ./vulnerable_app_unified
+      dockerfile: Dockerfile.apache
+    container_name: team1
+    environment:
+      - TEAM_ID=team1
+      - MAIN_SERVER=http://172.30.0.10:5000
+      - PORT=8000
+      - SECRET_KEY=team1-secret-key
+      - APACHE_LOG_DIR=/var/log/apache2
+    ports:
+      - "8101:8000"
+    volumes:
+      - team1-logs:/app/logs
+      - team1-files:/app/files
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.101
+    depends_on:
+      - ad-main
+
+  # 隊伍 2
+  team2:
+    build:
+      context: ./vulnerable_app_unified
+      dockerfile: Dockerfile.apache
+    container_name: team2
+    environment:
+      - TEAM_ID=team2
+      - MAIN_SERVER=http://172.30.0.10:5000
+      - PORT=8000
+      - SECRET_KEY=team2-secret-key
+      - APACHE_LOG_DIR=/var/log/apache2
+    ports:
+      - "8102:8000"
+    volumes:
+      - team2-logs:/app/logs
+      - team2-files:/app/files
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.102
+    depends_on:
+      - ad-main
+
+  # 隊伍 3
+  team3:
+    build:
+      context: ./vulnerable_app_unified
+      dockerfile: Dockerfile.apache
+    container_name: team3
+    environment:
+      - TEAM_ID=team3
+      - MAIN_SERVER=http://172.30.0.10:5000
+      - PORT=8000
+      - SECRET_KEY=team3-secret-key
+      - APACHE_LOG_DIR=/var/log/apache2
+    ports:
+      - "8103:8000"
+    volumes:
+      - team3-logs:/app/logs
+      - team3-files:/app/files
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.103
+    depends_on:
+      - ad-main
+
+  # 隊伍 4
+  team4:
+    build:
+      context: ./vulnerable_app_unified
+      dockerfile: Dockerfile.apache
+    container_name: team4
+    environment:
+      - TEAM_ID=team4
+      - MAIN_SERVER=http://172.30.0.10:5000
+      - PORT=8000
+      - SECRET_KEY=team4-secret-key
+      - APACHE_LOG_DIR=/var/log/apache2
+    ports:
+      - "8104:8000"
+    volumes:
+      - team4-logs:/app/logs
+      - team4-files:/app/files
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.104
+    depends_on:
+      - ad-main
+
+  # 隊伍 5
+  team5:
+    build:
+      context: ./vulnerable_app_unified
+      dockerfile: Dockerfile.apache
+    container_name: team5
+    environment:
+      - TEAM_ID=team5
+      - MAIN_SERVER=http://172.30.0.10:5000
+      - PORT=8000
+      - SECRET_KEY=team5-secret-key
+      - APACHE_LOG_DIR=/var/log/apache2
+    ports:
+      - "8105:8000"
+    volumes:
+      - team5-logs:/app/logs
+      - team5-files:/app/files
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.105
+    depends_on:
+      - ad-main
+
+  # 隊伍 6
+  team6:
+    build:
+      context: ./vulnerable_app_unified
+      dockerfile: Dockerfile.apache
+    container_name: team6
+    environment:
+      - TEAM_ID=team6
+      - MAIN_SERVER=http://172.30.0.10:5000
+      - PORT=8000
+      - SECRET_KEY=team6-secret-key
+      - APACHE_LOG_DIR=/var/log/apache2
+    ports:
+      - "8106:8000"
+    volumes:
+      - team6-logs:/app/logs
+      - team6-files:/app/files
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.106
+    depends_on:
+      - ad-main
+
+  # 隊伍 7
+  team7:
+    build:
+      context: ./vulnerable_app_unified
+      dockerfile: Dockerfile.apache
+    container_name: team7
+    environment:
+      - TEAM_ID=team7
+      - MAIN_SERVER=http://172.30.0.10:5000
+      - PORT=8000
+      - SECRET_KEY=team7-secret-key
+      - APACHE_LOG_DIR=/var/log/apache2
+    ports:
+      - "8107:8000"
+    volumes:
+      - team7-logs:/app/logs
+      - team7-files:/app/files
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.107
+    depends_on:
+      - ad-main
+
+  # 隊伍 8
+  team8:
+    build:
+      context: ./vulnerable_app_unified
+      dockerfile: Dockerfile.apache
+    container_name: team8
+    environment:
+      - TEAM_ID=team8
+      - MAIN_SERVER=http://172.30.0.10:5000
+      - PORT=8000
+      - SECRET_KEY=team8-secret-key
+      - APACHE_LOG_DIR=/var/log/apache2
+    ports:
+      - "8108:8000"
+    volumes:
+      - team8-logs:/app/logs
+      - team8-files:/app/files
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.108
+    depends_on:
+      - ad-main
+
+  # 隊伍 9
+  team9:
+    build:
+      context: ./vulnerable_app_unified
+      dockerfile: Dockerfile.apache
+    container_name: team9
+    environment:
+      - TEAM_ID=team9
+      - MAIN_SERVER=http://172.30.0.10:5000
+      - PORT=8000
+      - SECRET_KEY=team9-secret-key
+      - APACHE_LOG_DIR=/var/log/apache2
+    ports:
+      - "8109:8000"
+    volumes:
+      - team9-logs:/app/logs
+      - team9-files:/app/files
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.109
+    depends_on:
+      - ad-main
+
+  # 隊伍 10
+  team10:
+    build:
+      context: ./vulnerable_app_unified
+      dockerfile: Dockerfile.apache
+    container_name: team10
+    environment:
+      - TEAM_ID=team10
+      - MAIN_SERVER=http://172.30.0.10:5000
+      - PORT=8000
+      - SECRET_KEY=team10-secret-key
+      - APACHE_LOG_DIR=/var/log/apache2
+    ports:
+      - "8110:8000"
+    volumes:
+      - team10-logs:/app/logs
+      - team10-files:/app/files
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.110
+    depends_on:
+      - ad-main
+
+  # 隊伍 11
+  team11:
+    build:
+      context: ./vulnerable_app_unified
+      dockerfile: Dockerfile.apache
+    container_name: team11
+    environment:
+      - TEAM_ID=team11
+      - MAIN_SERVER=http://172.30.0.10:5000
+      - PORT=8000
+      - SECRET_KEY=team11-secret-key
+      - APACHE_LOG_DIR=/var/log/apache2
+    ports:
+      - "8111:8000"
+    volumes:
+      - team11-logs:/app/logs
+      - team11-files:/app/files
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.111
+    depends_on:
+      - ad-main
+
+  # 隊伍 12
+  team12:
+    build:
+      context: ./vulnerable_app_unified
+      dockerfile: Dockerfile.apache
+    container_name: team12
+    environment:
+      - TEAM_ID=team12
+      - MAIN_SERVER=http://172.30.0.10:5000
+      - PORT=8000
+      - SECRET_KEY=team12-secret-key
+      - APACHE_LOG_DIR=/var/log/apache2
+    ports:
+      - "8112:8000"
+    volumes:
+      - team12-logs:/app/logs
+      - team12-files:/app/files
+    networks:
+      ad-network:
+        ipv4_address: 172.30.0.112
+    depends_on:
+      - ad-main
+
+networks:
+  ad-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24
+
+volumes:
+  ad-data:
+  team1-logs:
+  team1-files:
+  team2-logs:
+  team2-files:
+  team3-logs:
+  team3-files:
+  team4-logs:
+  team4-files:
+  team5-logs:
+  team5-files:
+  team6-logs:
+  team6-files:
+  team7-logs:
+  team7-files:
+  team8-logs:
+  team8-files:
+  team9-logs:
+  team9-files:
+  team10-logs:
+  team10-files:
+  team11-logs:
+  team11-files:
+  team12-logs:
+  team12-files:

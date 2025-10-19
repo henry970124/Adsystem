@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Monitor</title>
+    <style>
+        body { font-family: Arial; max-width: 900px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        input { width: 70%; padding: 12px; border: 2px solid #667eea; border-radius: 5px; }
+        button { padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .output { background: #000; color: #0f0; padding: 20px; border-radius: 5px; font-family: monospace; margin: 20px 0; white-space: pre-wrap; }
+        .hint { background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 System Monitor</h1>
+        
+        <h3>DNS Lookup</h3>
+        <form method="POST">
+            <input type="text" name="host" value="{{ host }}" placeholder="Enter hostname (e.g., google.com)" required>
+            <button type="submit">Lookup</button>
+        </form>
+        
+        <div class="hint">
+            <strong>💡 Hint:</strong> DNS lookup for any host. Runs: <code>dig [host]</code>
+        </div>
+        
+        {% if output %}
+        <h3>Output:</h3>
+        <div class="output">{{ output }}</div>
+        {% endif %}
+        
+        <p><a href="/">← Back to Home</a></p>
+    </div>
+</body>
+</html>

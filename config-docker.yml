@@ -1,0 +1,72 @@
+# A&D CTF 系統配置 (Docker 版本)
+
+game:
+  num_teams: 12
+  round_duration: 1800            # Round 時長 (秒) - 30 分鐘
+  patch_duration: 60              # Patch 套用時間 (秒) - 1 分鐘
+  flag_lifetime: 30             # Flag 有效期 (秒) - 此值已不使用，flags 永久有效
+  service_check_interval: 5      # 服務檢查間隔 (秒)
+  
+scoring:
+  sla_total_pool: 60              # SLA 總分數池 (所有在線隊伍平分)
+  base_defense_score: 12           # 基礎防禦分數 (沒人偷到flag時的滿分)
+  attack_score_per_flag: 1         # 每偷取一個 flag 得 1 分
+  defense_penalty_per_steal: 1     # 每被偷取一次扣 1 分
+
+teams:
+  - id: 1
+    name: "Team 1"
+    host: "team1"
+    port: 8000
+  - id: 2
+    name: "Team 2"
+    host: "team2"
+    port: 8000
+  - id: 3
+    name: "Team 3"
+    host: "team3"
+    port: 8000
+  - id: 4
+    name: "Team 4"
+    host: "team4"
+    port: 8000
+  - id: 5
+    name: "Team 5"
+    host: "team5"
+    port: 8000
+  - id: 6
+    name: "Team 6"
+    host: "team6"
+    port: 8000
+  - id: 7
+    name: "Team 7"
+    host: "team7"
+    port: 8000
+  - id: 8
+    name: "Team 8"
+    host: "team8"
+    port: 8000
+  - id: 9
+    name: "Team 9"
+    host: "team9"
+    port: 8000
+  - id: 10
+    name: "Team 10"
+    host: "team10"
+    port: 8000
+  - id: 11
+    name: "Team 11"
+    host: "team11"
+    port: 8000
+  - id: 12
+    name: "Team 12"
+    host: "team12"
+    port: 8000
+
+server:
+  host: "0.0.0.0"
+  port: 5000
+  debug: false
+
+database:
+  path: "/app/data/game.db"

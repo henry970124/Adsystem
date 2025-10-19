@@ -1,0 +1,82 @@
+FROM ubuntu:22.04
+
+# 避免交互式提示
+ENV DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /app
+
+# 安裝 Apache, Python, mod_wsgi 和系統工具
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    apache2 \
+    apache2-dev \
+    python3 \
+    python3-pip \
+    libapache2-mod-wsgi-py3 \
+    dnsutils \
+    grep \
+    iputils-ping \
+    procps \
+    curl \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# 安裝 Python 依賴
+RUN pip3 install --no-cache-dir flask==3.0.0 requests==2.31.0
+
+# 複製應用程式文件
+COPY app.py /app/
+COPY wsgi.py /app/
+COPY templates/ /app/templates/
+
+# 創建必要的目錄
+RUN mkdir -p /app/files /app/uploads /app/logs /app/static && \
+    chmod -R 777 /app
+
+# 複製 Apache 配置
+COPY apache-config.conf /etc/apache2/sites-available/teamapp.conf
+
+# 允許 mod_wsgi 以 root 運行 (在 apache2.conf 中添加全域設定)
+RUN echo "\n# Allow WSGI to run as root (CTF purposes only)\nWSGIRestrictEmbedded Off" >> /etc/apache2/apache2.conf
+
+# 配置 Apache 以 root 用戶運行所有進程 (CTF 環境)
+RUN sed -i 's/^User .*/User root/' /etc/apache2/apache2.conf && \
+    sed -i 's/^Group .*/Group root/' /etc/apache2/apache2.conf
+
+# 啟用站點並禁用默認站點
+RUN a2dissite 000-default.conf && \
+    a2ensite teamapp.conf && \
+    a2enmod wsgi
+
+# 創建啟動腳本
+RUN echo '#!/bin/bash\n\
+set -e\n\
+\n\
+# 確保必要目錄存在\n\
+mkdir -p /var/log/apache2 /var/run/apache2 /var/lock/apache2\n\
+\n\
+# 註釋掉 apache2.conf 中的 User/Group 行 (允許以 root 運行 - CTF 環境)\n\
+sed -i "s/^User root$/# User root (running as root for CTF)/" /etc/apache2/apache2.conf\n\
+sed -i "s/^Group root$/# Group root (running as root for CTF)/" /etc/apache2/apache2.conf\n\
+\n\
+# 設置 Apache 環境變數\n\
+export APACHE_RUN_USER=root\n\
+export APACHE_RUN_GROUP=root\n\
+export APACHE_LOG_DIR=/var/log/apache2\n\
+export APACHE_RUN_DIR=/var/run/apache2\n\
+export APACHE_LOCK_DIR=/var/lock/apache2\n\
+export APACHE_PID_FILE=/var/run/apache2/apache2.pid\n\
+\n\
+# 啟動 Apache (前台運行)\n\
+echo "Starting Apache web server as root (CTF environment)..."\n\
+exec /usr/sbin/apache2 -D FOREGROUND\n\
+' > /app/start.sh && chmod +x /app/start.sh
+
+# 確保以 root 用戶運行
+USER root
+
+# 暴露端口
+EXPOSE 8000
+
+# 啟動 Apache
+CMD ["/app/start.sh"]

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Log Viewer</title>
+    <style>
+        body { font-family: Arial; max-width: 900px; margin: 50px auto; padding: 20px; background: #f5f5f5; }
+        .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        input { width: 70%; padding: 12px; border: 2px solid #667eea; border-radius: 5px; }
+        button { padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .output { background: #000; color: #0f0; padding: 20px; border-radius: 5px; font-family: monospace; margin: 20px 0; white-space: pre-wrap; max-height: 400px; overflow-y: auto; }
+        .hint { background: #fff3cd; padding: 15px; border-left: 4px solid #ffc107; margin: 20px 0; border-radius: 5px; }
+        .warning { background: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 20px 0; border-radius: 5px; color: #721c24; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Log Viewer</h1>
+        
+        <h3>Search Logs</h3>
+        <form method="POST">
+            <input type="text" name="keyword" value="{{ keyword }}" placeholder="Search keyword..." required>
+            <button type="submit">Search</button>
+        </form>
+        
+        <div class="hint">
+            <strong>💡 Hint:</strong> Searches all log files in /app/logs/. Runs: <code>grep -r "[keyword]" /app/logs/</code>
+        </div>
+        
+        <div class="warning">
+            <strong>⚠️ Security Tip:</strong> This searches: access.log, error.log, system.log, and flag.log
+        </div>
+        
+        {% if output %}
+        <h3>Search Results:</h3>
+        <div class="output">{{ output }}</div>
+        {% endif %}
+        
+        <p><a href="/">← Back to Home</a></p>
+    </div>
+</body>
+</html>

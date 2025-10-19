@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>System Management Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        .header { text-align: center; color: white; padding: 40px 0; }
+        .header h1 { font-size: 3em; margin-bottom: 10px; }
+        .header p { font-size: 1.2em; opacity: 0.9; }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 50px; }
+        .feature-card { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .feature-card h3 { color: #667eea; margin-bottom: 15px; font-size: 1.5em; }
+        .feature-card p { color: #666; line-height: 1.6; margin-bottom: 20px; }
+        .feature-card a { display: inline-block; padding: 10px 25px; background: #667eea; color: white; text-decoration: none; border-radius: 25px; }
+        .user-info { background: rgba(255,255,255,0.2); color: white; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖥️ System Management Portal</h1>
+            <p>Powerful tools for system administrators</p>
+        </div>
+        
+        {% if session.get('username') %}
+        <div class="user-info">
+            <strong>👤 Logged in as:</strong> {{ session.get('username') }}
+            {% if session.get('is_admin') %}
+            <span style="background: #ffc107; color: #000; padding: 5px 10px; border-radius: 5px; margin-left: 10px;">ADMIN</span>
+            {% endif %}
+            <a href="/logout" style="margin-left: 20px; color: white;">Logout</a>
+        </div>
+        {% endif %}
+        
+        <div class="features">
+            <div class="feature-card">
+                <h3>📊 System Monitor</h3>
+                <p>Real-time system status monitoring.</p>
+                <a href="/monitor">Monitor →</a>
+            </div>
+            
+            <div class="feature-card">
+                <h3>🔍 Log Viewer</h3>
+                <p>Search and analyze system logs.</p>
+                <a href="/logs">View Logs →</a>
+            </div>
+            
+            <div class="feature-card">
+                <h3>📁 File Manager</h3>
+                <p>Browse and download files.</p>
+                <a href="/files">Manage Files →</a>
+            </div>
+            
+            <div class="feature-card">
+                <h3>👤 User Panel</h3>
+                <p>Manage your account.</p>
+                <a href="/login">Login →</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
