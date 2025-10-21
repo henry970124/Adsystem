@@ -413,8 +413,23 @@ def get_flag_history():
             flag_value = row['flag']
             masked_flag = flag_value[:8] + '*' * (len(flag_value) - 8) if len(flag_value) > 8 else '****'
             
+            # 修正時間格式 - 處理資料庫中的時間字串
+            timestamp_str = row['timestamp']
+            try:
+                # 嘗試解析時間戳
+                if isinstance(timestamp_str, str):
+                    if ' ' in timestamp_str:
+                        dt = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
+                    else:
+                        dt = datetime.fromisoformat(timestamp_str)
+                    formatted_timestamp = dt.strftime('%Y-%m-%d %p %I:%M:%S')
+                else:
+                    formatted_timestamp = timestamp_str
+            except:
+                formatted_timestamp = timestamp_str
+            
             history.append({
-                'timestamp': row['timestamp'],
+                'timestamp': formatted_timestamp,
                 'flag': masked_flag,  # 使用遮罩後的 flag
                 'success': bool(row['success']),
                 'attacker_team': row['attacker_team'] or 'Unknown',
@@ -475,14 +490,21 @@ def upload_patch():
     if not file.filename.endswith('.py'):
         return jsonify({'success': False, 'message': 'Only .py files allowed'}), 400
     
-    # 保存 Patch
-    patch_dir = '/app/patches'
+    # 保存 Patch 到持久化目錄
+    patch_dir = '/app/data/patches'  # 改為持久化路徑
     os.makedirs(patch_dir, exist_ok=True)
     
     patch_path = os.path.join(patch_dir, f'{team_id}_app.py')
     file.save(patch_path)
     
-    logger.info(f"Patch uploaded for team {team_id}")
+    # 同時保存一份到 /app/patches 供立即套用使用
+    temp_patch_dir = '/app/patches'
+    os.makedirs(temp_patch_dir, exist_ok=True)
+    temp_patch_path = os.path.join(temp_patch_dir, f'{team_id}_app.py')
+    file.seek(0)  # 重置文件指針
+    file.save(temp_patch_path)
+    
+    logger.info(f"Patch uploaded for team {team_id} (saved to persistent storage)")
     
     return jsonify({
         'success': True,
@@ -506,8 +528,8 @@ def download_patch():
     team_str = auth_result['team_id']
     team_id = int(team_str.replace('team', ''))
     
-    # 檢查 patch 檔案是否存在
-    patch_dir = '/app/patches'
+    # 從持久化目錄檢查 patch 檔案
+    patch_dir = '/app/data/patches'
     patch_path = os.path.join(patch_dir, f'{team_id}_app.py')
     
     if not os.path.exists(patch_path):
@@ -548,8 +570,8 @@ def list_patches():
     if auth_result['role'] not in ['team', 'admin']:
         return jsonify({'success': False, 'message': 'Invalid token type'}), 403
     
-    # 列出所有 patch 檔案
-    patch_dir = '/app/patches'
+    # 從持久化目錄列出所有 patch 檔案
+    patch_dir = '/app/data/patches'
     if not os.path.exists(patch_dir):
         return jsonify({'patches': []})
     
@@ -566,7 +588,9 @@ def list_patches():
                 file_mtime = os.path.getmtime(file_path)
                 
                 from datetime import datetime
-                upload_time = datetime.fromtimestamp(file_mtime).strftime('%Y-%m-%d %H:%M:%S')
+                # 修正時間格式 - 使用24小時制並包含上午/下午標記
+                dt = datetime.fromtimestamp(file_mtime)
+                upload_time = dt.strftime('%Y-%m-%d %p %I:%M:%S')  # 使用 %p 顯示 AM/PM，%I 為12小時制
                 
                 patches.append({
                     'team_id': team_id,
@@ -603,8 +627,8 @@ def download_other_team_patch(target_team_id):
     if auth_result['role'] not in ['team', 'admin']:
         return jsonify({'success': False, 'message': 'Invalid token type'}), 403
     
-    # 檢查目標隊伍的 patch 是否存在
-    patch_dir = '/app/patches'
+    # 從持久化目錄檢查目標隊伍的 patch
+    patch_dir = '/app/data/patches'
     patch_path = os.path.join(patch_dir, f'{target_team_id}_app.py')
     
     if not os.path.exists(patch_path):
@@ -677,9 +701,12 @@ def stop_game():
 
 def apply_patches():
     """套用所有隊伍的 Patch 到正在運行的容器"""
-    patch_dir = '/app/patches'
-    if not os.path.exists(patch_dir):
-        logger.info("No patches directory found")
+    # 從持久化目錄讀取 patches
+    persistent_patch_dir = '/app/data/patches'
+    temp_patch_dir = '/app/patches'
+    
+    if not os.path.exists(persistent_patch_dir):
+        logger.info("No persistent patches directory found")
         return
     
     logger.info("=== Applying Patches ===")
@@ -691,14 +718,14 @@ def apply_patches():
     for team in teams:
         team_id = team['id']
         team_name = f"team{team_id}"
-        patch_file = os.path.join(patch_dir, f'{team_id}_app.py')
+        persistent_patch_file = os.path.join(persistent_patch_dir, f'{team_id}_app.py')
         
-        if os.path.exists(patch_file):
+        if os.path.exists(persistent_patch_file):
             try:
                 # 使用 docker cp 將檔案複製到正在運行的容器
                 result = subprocess.run([
                     'docker', 'cp',
-                    patch_file,
+                    persistent_patch_file,
                     f'{team_name}:/app/app.py'
                 ], capture_output=True, text=True, timeout=10)
                 
@@ -717,8 +744,11 @@ def apply_patches():
                     else:
                         logger.warning(f"Could not restart Apache for {team_name}, container may need manual restart")
                     
-                    # 刪除已套用的 patch
-                    os.remove(patch_file)
+                    # 注意：不刪除持久化的 patch 文件，這樣下次重啟後仍可使用
+                    # 只清理臨時目錄中的文件
+                    temp_patch_file = os.path.join(temp_patch_dir, f'{team_id}_app.py')
+                    if os.path.exists(temp_patch_file):
+                        os.remove(temp_patch_file)
                 else:
                     logger.error(f"Failed to apply patch for {team_name}: {result.stderr}")
                 

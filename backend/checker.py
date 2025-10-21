@@ -19,41 +19,48 @@ class ServiceChecker:
         try:
             # 根據不同端點測試不同功能
             if endpoint == '/files':
-                # 測試檔案列表功能
+                # 測試檔案列表功能 - 檢查是否返回檔案列表頁面
                 response = requests.get(f"{url}/files", timeout=self.timeout)
                 if response.status_code != 200:
                     return False, f"HTTP {response.status_code}"
-                # 檢查是否有檔案列表內容
-                if len(response.text) < 100:
-                    return False, "No file listing"
+                # 檢查是否有檔案列表相關內容
+                content = response.text.lower()
+                if 'file' not in content and 'download' not in content:
+                    return False, "No file listing found"
                 return True, None
                 
             elif endpoint == '/logs':
-                # 測試日誌搜尋功能 - 發送 POST 請求測試搜尋
+                # 測試日誌搜尋功能 - 實際執行 grep 搜尋並檢查輸出
                 response = requests.post(
                     f"{url}/logs",
-                    data={'keyword': 'test'},
+                    data={'keyword': 'log'},
                     timeout=self.timeout
                 )
                 if response.status_code != 200:
                     return False, f"HTTP {response.status_code}"
-                # 檢查搜尋功能是否回應
-                if len(response.text) < 100:
-                    return False, "Search not working"
+                # 檢查 grep 搜尋是否有實際輸出（應該會找到 log 這個關鍵字）
+                content = response.text.lower()
+                if 'log' not in content or len(response.text) < 50:
+                    return False, "Grep search not working properly"
                 return True, None
                 
             elif endpoint == '/monitor':
-                # 測試監控功能 - 發送 POST 請求測試 dig 指令
+                # 測試監控功能 - 實際執行 dig 指令並檢查是否返回 DNS 查詢結果
                 response = requests.post(
                     f"{url}/monitor",
-                    data={'host': 'localhost'},
+                    data={'host': 'google.com'},
                     timeout=self.timeout
                 )
                 if response.status_code != 200:
                     return False, f"HTTP {response.status_code}"
-                # 檢查監控指令是否有輸出
-                if len(response.text) < 100:
-                    return False, "Monitor command not working"
+                # 檢查 dig 指令是否有實際輸出（dig 的典型輸出特徵）
+                content = response.text.lower()
+                # dig 的輸出通常包含這些關鍵字
+                dig_keywords = ['answer', 'query', 'status', 'opcode', 'google.com']
+                found_keywords = sum(1 for keyword in dig_keywords if keyword in content)
+                
+                if found_keywords < 2:  # 至少要有2個關鍵字才算正常
+                    return False, f"Dig command not returning expected output (found {found_keywords}/5 keywords)"
                 return True, None
             
             return False, "Unknown endpoint"
