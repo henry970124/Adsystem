@@ -2,6 +2,7 @@ import sqlite3
 from datetime import datetime
 from typing import List, Dict, Optional
 import json
+from zoneinfo import ZoneInfo
 
 class Database:
     def __init__(self, db_path: str):
@@ -143,7 +144,7 @@ class Database:
         cursor = conn.cursor()
         cursor.execute(
             'INSERT INTO rounds (round_number, start_time, status) VALUES (?, ?, ?)',
-            (round_number, datetime.now(), 'active')
+            (round_number, datetime.now(tz=ZoneInfo('Asia/Taipei')), 'active')
         )
         round_id = cursor.lastrowid
         conn.commit()
@@ -167,7 +168,7 @@ class Database:
         cursor = conn.cursor()
         cursor.execute(
             'UPDATE rounds SET status = "closed", end_time = ? WHERE id = ?',
-            (datetime.now(), round_id)
+            (datetime.now(tz=ZoneInfo('Asia/Taipei')), round_id)
         )
         conn.commit()
         conn.close()
@@ -284,7 +285,7 @@ class Database:
             INSERT OR REPLACE INTO scores 
             (team_id, round_id, sla_score, defense_score, attack_score, total_score, calculated_at)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (team_id, round_id, sla_score, defense_score, attack_score, total_score, datetime.now()))
+        ''', (team_id, round_id, sla_score, defense_score, attack_score, total_score, datetime.now(tz=ZoneInfo('Asia/Taipei'))))
         conn.commit()
         conn.close()
     

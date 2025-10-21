@@ -25,9 +25,9 @@ COPY . .
 # 創建數據目錄
 RUN mkdir -p /app/data
 
-# 複製啟動腳本
+# 複製啟動腳本並確保使用 Unix 換行符
 COPY start.sh /app/start.sh
-RUN chmod +x /app/start.sh
+RUN sed -i 's/\r$//' /app/start.sh && chmod +x /app/start.sh
 
 # 暴露端口
 EXPOSE 5000

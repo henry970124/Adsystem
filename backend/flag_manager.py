@@ -3,6 +3,7 @@ import hashlib
 from datetime import datetime, timedelta
 from typing import Dict, List
 from models import Database
+from zoneinfo import ZoneInfo
 
 class FlagManager:
     def __init__(self, db: Database, flag_format: str = "FLAG{{{team_id}_{round}_{secret}}}"):
@@ -13,7 +14,7 @@ class FlagManager:
     def generate_flag(self, team_id: int, round_number: int, vuln_type: str = '') -> str:
         """生成唯一的 Flag（Hash 格式）"""
         # 生成隨機數據（加入漏洞類型確保不同）
-        random_data = f"{team_id}_{round_number}_{vuln_type}_{secrets.token_hex(16)}_{datetime.now().isoformat()}"
+        random_data = f"{team_id}_{round_number}_{vuln_type}_{secrets.token_hex(16)}_{datetime.now(tz=ZoneInfo('Asia/Taipei')).isoformat()}"
         # 使用 SHA256 生成 Hash
         flag_hash = hashlib.sha256(random_data.encode()).hexdigest()
         flag = self.flag_format.format(

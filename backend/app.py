@@ -9,6 +9,7 @@ import os
 import subprocess
 import json
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 from models import Database
 from flag_manager import FlagManager
@@ -165,11 +166,14 @@ def get_status():
                 # 將空格格式轉換為 ISO 格式
                 start_time_str = start_time_str.replace(' ', 'T')
             start_time = datetime.fromisoformat(start_time_str)
+            # 確保 start_time 有時區資訊
+            if start_time.tzinfo is None:
+                start_time = start_time.replace(tzinfo=ZoneInfo('Asia/Taipei'))
             
             playing_end = start_time + timedelta(seconds=round_duration)
             patching_end = playing_end + timedelta(seconds=patch_duration)
             
-            now = datetime.now()
+            now = datetime.now(tz=ZoneInfo('Asia/Taipei'))
             
             # 判斷當前階段並計算剩餘時間
             if now < playing_end:
@@ -413,7 +417,7 @@ def get_flag_history():
             flag_value = row['flag']
             masked_flag = flag_value[:8] + '*' * (len(flag_value) - 8) if len(flag_value) > 8 else '****'
             
-            # 修正時間格式 - 處理資料庫中的時間字串
+            # 修正時間格式 - 處理資料庫中的時間字串，套用台灣時區
             timestamp_str = row['timestamp']
             try:
                 # 嘗試解析時間戳
@@ -422,6 +426,9 @@ def get_flag_history():
                         dt = datetime.strptime(timestamp_str, '%Y-%m-%d %H:%M:%S')
                     else:
                         dt = datetime.fromisoformat(timestamp_str)
+                    # 如果沒有時區資訊，假設是台灣時區
+                    if dt.tzinfo is None:
+                        dt = dt.replace(tzinfo=ZoneInfo('Asia/Taipei'))
                     formatted_timestamp = dt.strftime('%Y-%m-%d %p %I:%M:%S')
                 else:
                     formatted_timestamp = timestamp_str
@@ -588,8 +595,8 @@ def list_patches():
                 file_mtime = os.path.getmtime(file_path)
                 
                 from datetime import datetime
-                # 修正時間格式 - 使用24小時制並包含上午/下午標記
-                dt = datetime.fromtimestamp(file_mtime)
+                # 修正時間格式 - 使用台灣時區 (UTC+8)
+                dt = datetime.fromtimestamp(file_mtime, tz=ZoneInfo('Asia/Taipei'))
                 upload_time = dt.strftime('%Y-%m-%d %p %I:%M:%S')  # 使用 %p 顯示 AM/PM，%I 為12小時制
                 
                 patches.append({
@@ -666,7 +673,7 @@ def start_game():
         return jsonify({'error': 'Game already started'}), 400
     
     game_state['started'] = True
-    game_state['start_time'] = datetime.now()
+    game_state['start_time'] = datetime.now(tz=ZoneInfo('Asia/Taipei'))
     
     # 啟動遊戲循環
     threading.Thread(target=game_loop, daemon=True).start()
@@ -840,7 +847,7 @@ def game_loop():
                 
                 # 計算 patch 階段結束時間
                 patch_duration = config['game'].get('patch_duration', 300)
-                patch_end_time = datetime.now() + timedelta(seconds=patch_duration)
+                patch_end_time = datetime.now(tz=ZoneInfo('Asia/Taipei')) + timedelta(seconds=patch_duration)
                 
                 # 保存 patch 階段資訊供 API 使用
                 game_state['patch_phase_info'] = {
@@ -848,7 +855,7 @@ def game_loop():
                     'round_number': round_number,
                     'phase': 'patching',
                     'remaining_seconds': patch_duration,
-                    'start_time': datetime.now().isoformat()
+                    'start_time': datetime.now(tz=ZoneInfo('Asia/Taipei')).isoformat()
                 }
                 
                 # 廣播進入 Patch 階段
