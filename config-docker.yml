@@ -9,7 +9,7 @@ game:
   
 scoring:
   sla_total_pool: 60              # SLA 總分數池 (所有在線隊伍平分)
-  base_defense_score: 12           # 基礎防禦分數 (沒人偷到flag時的滿分)
+  base_defense_score: 3           # 基礎防禦分數 (沒人偷到flag時的滿分)
   attack_score_per_flag: 1         # 每偷取一個 flag 得 1 分
   defense_penalty_per_steal: 1     # 每被偷取一次扣 1 分
 

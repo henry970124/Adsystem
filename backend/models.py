@@ -232,9 +232,9 @@ class Database:
             cursor = conn.cursor()
             cursor.execute('''
                 INSERT INTO flag_submissions 
-                (submitter_team_id, target_team_id, round_id, flag_value, is_valid)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (submitter_team_id, target_team_id, round_id, flag_value, is_valid))
+                (submitter_team_id, target_team_id, round_id, flag_value, is_valid, submitted_at)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (submitter_team_id, target_team_id, round_id, flag_value, is_valid, datetime.now(tz=ZoneInfo('Asia/Taipei'))))
             conn.commit()
             conn.close()
         

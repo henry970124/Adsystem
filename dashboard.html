@@ -558,7 +558,7 @@
                 if (data.history && data.history.length > 0) {
                     tbody.innerHTML = data.history.slice(0, 20).map(entry => `
                         <tr>
-                            <td>${new Date(entry.timestamp).toLocaleString('zh-TW')}</td>
+                            <td>${entry.timestamp}</td>
                             <td>${entry.attacker_team}</td>
                             <td>${entry.victim_team}</td>
                             <td style="font-family: monospace; font-size: 0.9em;">${entry.flag.substring(0, 30)}...</td>
